@@ -168,7 +168,7 @@
         }
 
         /* ====== ヘッダー ====== */
-        header { position: fixed; top: 0; width: 100%; height: var(--header-height); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; background: var(--glass-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--glass-border); z-index: 1000; transform: translateY(-100%); transition: transform 0.8s ease; }
+        header { position: fixed; top: 0; width: 100%; height: var(--header-height); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; background: var(--glass-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--glass-border); z-index: 1000; transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
         body.loaded header { transform: translateY(0); }
         .logo-area { display: flex; align-items: baseline; gap: 10px; cursor: pointer; }
         .logo { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
@@ -246,6 +246,7 @@
             position: fixed; bottom: 25px; left: 0; width: 100%; 
             display: flex; justify-content: center; z-index: 500; pointer-events: none;
             background: none;
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.4s ease;
         }
         .chat-ui { 
             background: var(--glass-bg); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); 
@@ -304,6 +305,10 @@
             
             /* モバイルでは詳しく見るボタンと外部リンクボタンを幅100%にしてタップしやすく */
             .action-link-btn, .js-toggle-det { width: 100%; justify-content: center; }
+
+            /* スマートハイド（スクロールによるUI自動隠蔽）用スタイル */
+            body.loaded header.scroll-hide { transform: translateY(-100%); }
+            .chat-ui-wrapper.scroll-hide { transform: translateY(150px); opacity: 0; pointer-events: none; }
         }
     </style>
 </head>
@@ -336,7 +341,7 @@
     <header>
         <div class="logo-area" id="header-logo">
             <div class="logo">Studio OneMax</div>
-            <div class="version-badge">Ver 1.8.6</div>
+            <div class="version-badge">Ver 1.9.0</div>
         </div>
         <div class="header-actions">
             <button type="button" class="btn-base hidden" id="home-back-btn"><i class="fa-solid fa-house"></i> <span>ホーム</span></button>
@@ -394,7 +399,7 @@
                 description: "AI画像生成とキャラクター設定を融合。実際にストアで販売中の代表作。", 
                 details: { 
                     text: "全24種類のスタンプ。AIとの対話で生まれた独自のキャラクター造形により、可愛さと実用性を両立しています。<br><br><span style='font-size:1.05rem; color:var(--accent-primary); font-weight:800;'>120円で販売中</span><br><span style='font-size:0.8rem; color:var(--text-sub);'>※購入するプラットフォームにより値段が異なる場合があります。</span>", 
-                    isStamp: true, // スタンプ用グリッドを発動させるフラグ
+                    isStamp: true, 
                     images: [
                         "https://creators-market-all.line-scdn.net/line-user-stickers-sticker-4372/sticker/43726175/01/b9c06691e7ff8ce81865bf76b55580c8123c8ddb.png",
                         "https://creators-market-all.line-scdn.net/line-user-stickers-sticker-4372/sticker/43726175/02/b5b5674932ef9b1e8e89cf01f0591c6129ce457e.png",
@@ -436,7 +441,7 @@
                 } 
             },
             { 
-                id: "p2", order: 30, status: "completed", /* パスによりCompletedへ昇格 */
+                id: "p2", order: 30, status: "completed", 
                 title: "学習ツール『フォーカス・タイマー』", subtitle: "集中力を最大化するApp", 
                 description: "ポモドーロ・テクニックに基づいたタイマー。サイバーパンクな発光UI。",
                 details: {
@@ -488,6 +493,36 @@
         const modeToggleBtn = document.getElementById('mode-toggle-btn');
         const themeBtn = document.getElementById('theme-toggle-btn');
         const themeText = document.getElementById('theme-btn-text');
+        const headerEl = document.querySelector('header');
+
+        // --- スマートハイド（スクロール検知によるUI自動開閉） ---
+        let lastScrollY = window.scrollY;
+        
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            
+            // ページ最上部付近では常に表示
+            if (currentScrollY < 50) {
+                headerEl.classList.remove('scroll-hide');
+                chatUiWrapper.classList.remove('scroll-hide');
+                lastScrollY = currentScrollY;
+                return;
+            }
+
+            // スクロール方向を検知 (遊びを設けてガタつきを防止)
+            if (Math.abs(currentScrollY - lastScrollY) > 10) {
+                if (currentScrollY > lastScrollY) {
+                    // 下へスクロール：読むのに集中するためUIを隠す
+                    headerEl.classList.add('scroll-hide');
+                    chatUiWrapper.classList.add('scroll-hide');
+                } else {
+                    // 上へスクロール：操作したいと判断しUIを表示
+                    headerEl.classList.remove('scroll-hide');
+                    chatUiWrapper.classList.remove('scroll-hide');
+                }
+                lastScrollY = currentScrollY;
+            }
+        });
 
         async function typeMessage(element, text) {
             element.textContent = "";
@@ -525,7 +560,6 @@
                 const cardWrapper = document.createElement('div');
                 cardWrapper.className = 'card-wrapper';
                 
-                // ★ 複数画像（スタンプ）と単一画像の両方に自動対応するレンダリング機構
                 let imagesHtml = '';
                 if (item.details && item.details.images && Array.isArray(item.details.images)) {
                     const gridClass = item.details.isStamp ? "detail-images stamp-grid" : "detail-images";
@@ -603,10 +637,8 @@
                 const isOpening = target.style.display !== 'block';
                 const card = toggleBtn.closest('.card');
                 
-                // スクロールジャンプ防止用：操作直前のカードの画面内Y座標を記憶
                 const rectBefore = card.getBoundingClientRect();
                 
-                // 排他的制御：他の開いている詳細パネルを全て閉じる.
                 if (isOpening) {
                     document.querySelectorAll('.detail-wrapper').forEach(el => {
                         if (el.id !== target.id) el.style.display = 'none';
@@ -615,7 +647,6 @@
                 
                 target.style.display = isOpening ? 'block' : 'none';
                 
-                // DOM変更後の位置を取得し、差分を瞬時に補正することで画面のガタつきを完全に相殺
                 const rectAfter = card.getBoundingClientRect();
                 window.scrollBy(0, rectAfter.top - rectBefore.top);
             }
