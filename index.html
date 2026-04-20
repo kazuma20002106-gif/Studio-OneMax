@@ -606,7 +606,7 @@
                 // スクロールジャンプ防止用：操作直前のカードの画面内Y座標を記憶
                 const rectBefore = card.getBoundingClientRect();
                 
-                // 排他的制御：他の開いている詳細パネルを全て閉じる
+                // 排他的制御：他の開いている詳細パネルを全て閉じる.
                 if (isOpening) {
                     document.querySelectorAll('.detail-wrapper').forEach(el => {
                         if (el.id !== target.id) el.style.display = 'none';
