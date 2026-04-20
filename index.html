@@ -22,7 +22,7 @@
             --text-focus: #f1f5f9; 
             --accent-primary: #00f2ff;
             --accent-secondary: #7000ff;
-            --glass-bg: rgba(255あ, 255, 255, 0.02);
+            --glass-bg: rgba(255, 255, 255, 0.02);
             --glass-border: rgba(255, 255, 255, 0.08);
             --aura-opacity: 0.15;
             --font-main: 'Inter', 'Noto Sans JP', sans-serif;
@@ -50,8 +50,13 @@
             flex-direction: column;
             overflow-x: hidden;
             position: relative;
-            word-break: auto-phrase; /* 最新ブラウザでの文節改行対応 */
+            word-break: auto-phrase;
             transition: background-color 0.8s ease, color 0.8s ease;
+        }
+
+        @media (max-width: 600px) {
+            .pc-only { display: none !important; }
+            .sp-only { display: inline !important; }
         }
 
         /* ====== オープニングアニメーション (Precision Clockwork V8.4) ====== */
@@ -146,13 +151,11 @@
         .btn-base:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
         .mode-switch-btn { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border: none; box-shadow: 0 4px 15px rgba(0, 242, 255, 0.2); }
 
-        /* ====== コンテンツ領域 (モバイル改行最適化) ====== */
+        /* ====== コンテンツ領域 ====== */
         #home-view { padding: 130px 25px; max-width: 1100px; margin: 0 auto; text-align: center; position: relative; z-index: 10; }
         .hero-title { font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 900; margin-bottom: 15px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.1; letter-spacing: -1px; }
         
         .mission-box { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 40px 25px; border-radius: 28px; margin: 0 auto 60px; max-width: 850px; backdrop-filter: blur(20px); }
-        
-        /* ★ アップデート：文節ラッピングによりモバイルでの不自然な改行を排除 */
         .phrase-wrap { display: inline-block; white-space: nowrap; }
         .mission-box p { font-size: 1.15rem; line-height: 2; color: var(--text-main); font-weight: 600; text-align: center; }
 
@@ -203,8 +206,20 @@
         .chat-btn:hover, .chat-btn.active { border-color: var(--accent-primary); color: var(--text-focus); background: rgba(255, 255, 255, 0.08); }
         .chat-btn.active::after { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border-radius: 42px; border: 1px solid var(--accent-primary); animation: button-pulse 2s infinite; }
 
-        .detail-wrapper { margin-top: 25px; background: rgba(0, 0, 0, 0.2); border-radius: 18px; padding: 20px; display: none; border: 1px solid var(--glass-border); animation: slideInUp 0.5s ease; }
-        .detail-image { width: 100%; border-radius: 12px; margin-top: 15px; border: 1px solid var(--glass-border); }
+        .detail-wrapper { margin-top: 25px; background: rgba(0, 0, 0, 0.2); border-radius: 18px; padding: 25px; display: none; border: 1px solid var(--glass-border); animation: slideInUp 0.5s ease; }
+        .detail-image { width: 100%; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--glass-border); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+
+        /* ★ アップデート：外部リンクボタンの完全復旧用スタイル */
+        .action-link-btn { 
+            display: inline-flex; align-items: center; gap: 10px; 
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); 
+            color: #fff; padding: 14px 28px; border-radius: 30px; 
+            text-decoration: none; font-weight: 800; font-size: 0.95rem; 
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 242, 255, 0.2);
+            margin-top: 10px;
+        }
+        .action-link-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(0, 242, 255, 0.4); color: #fff; }
 
         .hidden { display: none !important; }
         @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -216,6 +231,7 @@
             .mission-box p { font-size: 1rem; line-height: 1.8; }
             .chat-btn { padding: 8px 14px; font-size: 0.75rem; }
             .logo { font-size: 1.2rem; }
+            .action-link-btn { width: 100%; justify-content: center; } /* スマホではボタンを横幅いっぱいに */
         }
     </style>
 </head>
@@ -246,7 +262,7 @@
     <header>
         <div class="logo-area" id="header-logo">
             <div class="logo">Studio OneMax</div>
-            <div class="version-badge">Ver 1.8.4</div>
+            <div class="version-badge">Ver 1.8.5</div>
         </div>
         <div class="header-actions">
             <button type="button" class="btn-base hidden" id="home-back-btn"><i class="fa-solid fa-house"></i> <span>ホーム</span></button>
@@ -260,7 +276,6 @@
             <h1 class="hero-title">Studio OneMax</h1>
             <p style="font-size: clamp(1.1rem, 3vw, 1.4rem); color:var(--text-sub); margin-bottom:40px; font-weight:600; letter-spacing:1px;">ONE to MAX. 思考を最高到達点へ</p>
             <div class="mission-box">
-                <!-- ★ アップデート：文節ごとにphrase-wrapを適用。不自然な改行を物理的に防止 -->
                 <p>
                     <span class="phrase-wrap">「<span class="highlight-text color-cyan">1</span>」の閃きを、</span>
                     <span class="phrase-wrap">AIと共に</span>
@@ -298,6 +313,7 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // ★ アップデート：データベースに架空居酒屋とLINEスタンプのURLを組み込み
         const database = [
             { 
                 id: "p1", order: 10, status: "completed", 
@@ -305,14 +321,20 @@
                 description: "AI画像生成とキャラクター設定を融合。実際にストアで販売中の代表作。", 
                 details: { 
                     text: "全24種類のスタンプ。AIとの対話で生まれた独自のキャラクター造形により、可愛さと実用性を両立しています。", 
-                    image: "https://creators-market-all.line-scdn.net/line-user-stickers-sticker-4372/sticker/43726175/01/b9c06691e7ff8ce81865bf76b55580c8123c8ddb.png" 
+                    image: "https://creators-market-all.line-scdn.net/line-user-stickers-sticker-4372/sticker/43726175/01/b9c06691e7ff8ce81865bf76b55580c8123c8ddb.png",
+                    link: "https://line.me/S/sticker/33515510/?lang=ja&utm_source=gnsh_stickerDetail",
+                    linkText: "LINEストアで購入する"
                 } 
             },
             { 
-                id: "p4", order: 20, status: "planning", 
+                id: "p4", order: 20, status: "progress", /* URLが存在するため「進行中」へ格上げ */
                 title: "架空居酒屋『AI〜あい〜』", subtitle: "飲食店向けトータルブランディング", 
                 description: "AIを活用したシズル感のあるメニュー画像や、モダンな店舗サイトのUI設計を進行中。", 
-                details: { text: "デザインとテクノロジーが融合した、次世代の飲食店体験をデモケースとして構築しています。" } 
+                details: { 
+                    text: "デザインとテクノロジーが融合した、次世代の飲食店体験をデモケースとして構築しています。以下のボタンから実際のデモサイトを操作できます。",
+                    link: "https://kazuma20002106-gif.github.io/kakuuizakaya-AI-/",
+                    linkText: "デモサイトを起動する"
+                } 
             },
             { id: "p2", order: 30, status: "progress", title: "学習ツール『フォーカス・タイマー』", subtitle: "集中力を最大化するApp", description: "ポモドーロ・テクニックに基づいたタイマー。サイバーパンクな発光UI。" },
             { id: "l1", order: 40, status: "progress", title: "拠点構築プロジェクト", subtitle: "自社・他社向けサイト構築", description: "このサイトを含む、AI時代のポートフォリオ制作ログ。" },
@@ -394,13 +416,26 @@
             filtered.sort((a,b) => a.order - b.order).forEach((item) => {
                 const cardWrapper = document.createElement('div');
                 cardWrapper.className = 'card-wrapper';
+                
+                // ★ アップデート：詳細エリア内に「外部リンクボタン」の生成ロジックを完全復元
                 let detailHtml = item.details ? `
                     <button type="button" class="btn-base js-toggle-det" data-target="dt-${item.id}"><i class="fa-solid fa-magnifying-glass"></i> 詳しく見る</button>
-                    <div id="dt-${item.id}" class="detail-wrapper"><p style="font-size:1rem; line-height:1.6; color:var(--text-main);">${item.details.text}</p>
-                    ${item.details.image ? `<img src="${item.details.image}" class="detail-image">` : ''}</div>` : '';
+                    <div id="dt-${item.id}" class="detail-wrapper">
+                        ${item.details.image ? `<img src="${item.details.image}" class="detail-image" alt="詳細画像">` : ''}
+                        <p style="font-size:1rem; line-height:1.6; color:var(--text-main); margin-bottom:15px;">${item.details.text}</p>
+                        ${item.details.link ? `<a href="${item.details.link}" target="_blank" rel="noopener noreferrer" class="action-link-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${item.details.linkText || '詳細を見る'}</a>` : ''}
+                    </div>` : '';
 
-                cardWrapper.innerHTML = `<div class="card"><div style="display:flex; align-items:center; margin-bottom:10px;"><span class="badge">Project</span><span class="status-tag ${sMap[item.status]}">${sText[item.status]}</span></div>
-                    <h3 style="margin:10px 0;">${item.title}</h3><p style="color:var(--text-sub); margin-bottom:20px;"><strong>${item.subtitle}</strong><br>${item.description}</p>${detailHtml}</div>`;
+                cardWrapper.innerHTML = `
+                    <div class="card">
+                        <div style="display:flex; align-items:center; margin-bottom:10px;">
+                            <span class="badge">Project</span>
+                            <span class="status-tag ${sMap[item.status]}">${sText[item.status]}</span>
+                        </div>
+                        <h3 style="margin:10px 0;">${item.title}</h3>
+                        <p style="color:var(--text-sub); margin-bottom:20px;"><strong>${item.subtitle}</strong><br>${item.description}</p>
+                        ${detailHtml}
+                    </div>`;
                 normalModeEl.appendChild(cardWrapper);
             });
         }
